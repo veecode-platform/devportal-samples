@@ -3,7 +3,7 @@
 #
 # docker compose up --no-log-prefix
 #
-# Changes to dynamic-plugins*.yaml will be processed into app-config running this:
+# Changes to dynamic-plugins.yaml will be processed into app-config running this:
 #
 # docker compose exec devportal /app/install-dynamic-plugins.sh /app/dynamic-plugins-root
 #
@@ -16,14 +16,14 @@ services:
     environment:
       - NODE_ENV=development
       # will use shell value
-      - VEECODE_PROFILE=github
-      # GITHUB
-      - GITHUB_ORG
-      - GITHUB_APP_ID
-      - GITHUB_CLIENT_ID
-      - GITHUB_CLIENT_SECRET
-      - GITHUB_PRIVATE_KEY
-      - GITHUB_TOKEN
+      - VEECODE_PROFILE=azure
+      # AZURE/MS
+      - AZURE_TENANT_ID
+      - AZURE_CLIENT_ID
+      - AZURE_CLIENT_SECRET
+      - AZURE_ORGANIZATION
+      - AZURE_PROJECT
+      - AZURE_TOKEN
     volumes:
       # dynamic plugins config (just enable/disable plugins)
       - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
