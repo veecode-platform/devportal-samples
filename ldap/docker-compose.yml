@@ -1,0 +1,23 @@
+#
+# Starts DevPortal with LDAP authentication + org sync via the built-in "ldap" profile:
+#
+# docker compose up --no-log-prefix
+#
+
+services:
+  devportal:
+    image: veecode/devportal:latest
+    ports:
+      - "7007:7007"
+    environment:
+      - NODE_ENV=development
+      # will use shell value
+      - VEECODE_PROFILE=ldap
+      # LDAP
+      - LDAP_URL
+      - LDAP_DN
+      - LDAP_SECRET
+      - LDAP_USERS_BASE_DN
+      - LDAP_USERS_FILTER
+      - LDAP_GROUPS_BASE_DN
+      - LDAP_GROUPS_FILTER
