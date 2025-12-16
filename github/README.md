@@ -8,16 +8,18 @@ The environment variable `VEECODE_PROFILE` is set to `github`, which configures 
 
 This setup provides a complete GitHub integration for the DevPortal, enabling features like:
 
-- Repository insights and metrics
+- User authentication via GitHub OAuth
+- Repository catalog, insights and metrics
 - Security vulnerability scanning
 - GitHub Actions workflow visualization and management
-- GitHub application integration
+- GitHub scaffolding of projects from templates
 
 ## Prerequisites
 
 - Docker Desktop or compatible container engine
 - GitHub account and organization
-- GitHub App configured for your organization (see Setup section)
+- OAuth App configured for your organization (see below)
+- GitHub App configured for your organization (see below)
 
 ## Required Environment Variables
 
@@ -25,32 +27,73 @@ Before running this example, you need to configure the following GitHub credenti
 
 ### GitHub Settings
 
+This example uses the **GitHub profile** (`VEECODE_PROFILE=github`). The profile wires both:
+
+- **Authentication** (how users sign in) via a GitHub OAuth App
+- **Backend integrations** (catalog discovery, plugins, scaffolder actions, etc.) via a GitHub App and/or PAT
+
+Required environment variables (as per the GitHub profile docs):
+
 - `GITHUB_ORG` - Your GitHub organization name
-- `GITHUB_APP_ID` - The App ID from your GitHub App
-- `GITHUB_CLIENT_ID` - OAuth Client ID
-- `GITHUB_CLIENT_SECRET` - OAuth Client Secret
-- `GITHUB_PRIVATE_KEY` - The private key for your GitHub App (PEM format)
-- `GITHUB_TOKEN` - A personal access token with appropriate permissions
+- `GITHUB_APP_ID` - GitHub App ID
+- `GITHUB_AUTH_CLIENT_ID` - OAuth App client ID (authentication)
+- `GITHUB_AUTH_CLIENT_SECRET` - OAuth App client secret (authentication)
+- `GITHUB_CLIENT_ID` - GitHub App client ID (integrations)
+- `GITHUB_CLIENT_SECRET` - GitHub App client secret (integrations)
+- `GITHUB_PRIVATE_KEY` **or** `GITHUB_PRIVATE_KEY_BASE64` - GitHub App private key (PEM) (integrations)
+- `GITHUB_TOKEN` - Personal access token (PAT) or GitHub App token (fallback for integrations)
+
+Optional environment variables:
+
+- `GITHUB_HOST` - GitHub Enterprise hostname (defaults to `github.com`)
+- `GITHUB_AUTH_CLIENT_*` - If absent, DevPortal will fall back to `GITHUB_CLIENT_*` for auth
+
+Docs: https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles#github-profile
 
 ## Setup
 
-### 1. Create a GitHub App
+DevPortal integrates with GitHub for both authentication and backend integrations. The best arrangement is to create:
 
-You can create both a GitHub App and a Personal Access Token by following the instructions in the following links:
+- An OAuth App for user authentication
+- A GitHub App for backend integrations
+- An optional GitHub PAT (Personal Access Token) for fallback integrations and legacy plugins.
 
-- [Quick Setup with Profiles](https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles)
-- [GitHub Integrations](https://docs.platform.vee.codes/devportal/integrations/GitHub/)
+We are also using the `github` profile provided by VeeCode DevPortal to simplify the configuration. You can read more about profiles, authentication and integrations in the documentation:
 
-### 2. Set Environment Variables
+- [GitHub Auth & Integrations](https://docs.platform.vee.codes/devportal/integrations/GitHub/)
+- [Quick Setup with Profiles](https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles) (check the GitHub profile section)
+
+### 1. Create an OAuth App (Authentication)
+
+Create a GitHub **OAuth App** to enable sign-in.
+
+- Follow the official guide: https://docs.platform.vee.codes/devportal/integrations/GitHub/github-auth
+- Don't forget to set the callback URL to: `http://localhost:7007/api/auth/github/handler/frame`
+
+### 2. Create a GitHub App (Backend integrations)
+
+Create a GitHub **App** for backend access (catalog discovery and GitHub-powered plugins).
+
+- Guide: https://docs.platform.vee.codes/devportal/integrations/GitHub/github-integrations
+
+### 3. (Optional) Create a PAT (Fallback)
+
+Some plugins and edge cases may still require a PAT (and it can be used as a fallback when the GitHub App is not installed for a repo).
+
+- More context and the credential decision tree: https://docs.platform.vee.codes/devportal/integrations/GitHub/
+
+### 4. Set Environment Variables
 
 Export the required environment variables in your shell:
 
 ```bash
 export GITHUB_ORG="your-org-name"
 export GITHUB_APP_ID="123456"
-export GITHUB_CLIENT_ID="Iv1.abc123def456"
-export GITHUB_CLIENT_SECRET="your-client-secret"
-export GITHUB_PRIVATE_KEY="$(cat path/to/your-private-key.pem)"
+export GITHUB_AUTH_CLIENT_ID="Iv1.oauth_client_id"
+export GITHUB_AUTH_CLIENT_SECRET="your-oauth-client-secret"
+export GITHUB_CLIENT_ID="Iv1.github_app_client_id"
+export GITHUB_CLIENT_SECRET="your-github-app-client-secret"
+export GITHUB_PRIVATE_KEY_BASE64="$(cat path/to/your-github-app-private-key.pem | base64)"
 export GITHUB_TOKEN="ghp_your_personal_access_token"
 ```
 
@@ -63,6 +106,12 @@ docker compose up --no-log-prefix
 ```
 
 The DevPortal will be available at: **<http://localhost:7007>**
+
+If authentication fails, double-check your OAuth callback URL:
+
+- `http://localhost:7007/api/auth/github/handler/frame`
+
+Docs: https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles#authentication-fails
 
 ### Apply Dynamic Plugin Changes
 
@@ -124,4 +173,12 @@ Once the DevPortal is running:
 2. Sign in using your GitHub credentials
 3. Explore the catalog and GitHub-integrated features
 4. Check if organization teams and members were loaded as users and groups
-5. Check if repositories were loaded accordinf to their `catalog-info.yaml` files
+5. Check if repositories were loaded according to their `catalog-info.yaml` files
+
+
+For deeper customization, you can keep `VEECODE_PROFILE=github` and override settings via `app-config.local.yaml`.
+
+Docs:
+
+- https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles#combining-profiles-with-custom-config
+- https://docs.platform.vee.codes/devportal/installation-guide/docker-local/custom-config
