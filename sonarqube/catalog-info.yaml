@@ -1,0 +1,12 @@
+
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage
+  annotations:
+    sonarqube.org/project-key: veecode-demos_sonarqube-demo
+    sonarqube.org/instance-key: sonarcloud
+spec:
+  type: service
+  lifecycle: experimental
+  owner: user:default/admin

@@ -1,0 +1,21 @@
+#
+# Starts DevPortal with LDAP authentication + org sync via the built-in "ldap" profile:
+#
+# docker compose up --no-log-prefix
+#
+
+services:
+  devportal:
+    image: veecode/devportal:latest
+    ports:
+      - "7007:7007"
+    environment:
+      - NODE_ENV=development
+      - SONAR_TOKEN
+    volumes:
+      # your config will add/override the default image config
+      - ./app-config.yaml:/app/app-config.local.yaml:ro
+      # dynamic plugins config (just enable/disable plugins)
+      - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
+      # catalog-info for SonarQube project registration
+      - ./catalog-info.yaml:/app/sonar-catalog-info.yaml:ro

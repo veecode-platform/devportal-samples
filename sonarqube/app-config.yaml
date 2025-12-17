@@ -1,0 +1,15 @@
+# sonarqube overrides to bundled config
+
+# add location of catalog file
+catalog:
+  locations:
+    - type: file
+      target: /app/examples/org.yaml
+    - type: file
+      target: /app/sonar-catalog-info.yaml
+
+sonarqube:
+  baseUrl: https://sonarcloud.io
+  instanceKey: sonarcloud
+  apiKey: ${SONAR_TOKEN}
+  authType: Bearer # this defaults to Basic, it can be set to Bearer or Basic

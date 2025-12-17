@@ -1,0 +1,49 @@
+#
+# This is a dynamic plugins config file bundled with the devportal-base image.
+# It is used to define the behaviour of the dynamic plugins system pre-startup.
+#
+includes:
+  # Always start by merging the defaults that ship inside the image
+  # That makes it easy to enable plugins with defaults that would otherwise
+  # be painful to configure.
+  - dynamic-plugins.default.yaml
+
+plugins:
+  - package: ./dynamic-plugins/dist/backstage-community-plugin-scaffolder-backend-module-sonarqube-dynamic
+    disabled: true
+  - package: ./dynamic-plugins/dist/backstage-community-plugin-sonarqube
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          backstage-community.plugin-sonarqube:
+            entityTabs:
+              - path: /sonarqube
+                title: SonarQube
+                mountPoint: entity.page.sonarqube
+                config:
+                  if:
+                    allOf:
+                    - isSonarQubeAvailable
+            mountPoints:
+            - mountPoint: entity.page.overview/cards
+              importName: EntitySonarQubeCard
+              config:
+                layout:
+                  gridColumnEnd:
+                    lg: span 4
+                    md: span 6
+                    xs: span 12
+                if:
+                  allOf:
+                  - isSonarQubeAvailable
+            - mountPoint: entity.page.sonarqube/cards
+              importName: EntitySonarQubeContentPage
+              config:
+                layout:
+                  gridColumn: "1 / -1"   # full width page content
+                if:
+                  allOf:
+                  - isSonarQubeAvailable
+  - package: ./dynamic-plugins/dist/backstage-community-plugin-sonarqube-backend-dynamic
+    disabled: false
