@@ -70,7 +70,7 @@ catalog:
     bitbucket:
       development:
         workspace: ${BITBUCKET_WORKSPACE}
-        token: ${BITBUCKET_TOKEN}
+
 
         catalogPath: /catalog-info.yaml
 
