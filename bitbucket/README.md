@@ -40,6 +40,26 @@ services:
 
 ---
 
+## Dynamic Plugins (Required)
+
+Enable the Bitbucket Cloud dynamic plugins by editing `dynamic-plugins.yaml`:
+
+```yaml
+plugins:
+  - package: ./dynamic-plugins/dist/backstage-plugin-catalog-backend-module-bitbucket-cloud-dynamic
+    disabled: false
+
+  - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-bitbucket-cloud-dynamic
+    disabled: false
+```
+
+These plugins enable:
+
+- Automatic repository discovery (Catalog Provider)
+- Bitbucket actions in the Scaffolder
+
+---
+
 ## Backend Configuration
 
 The configuration below can be added to any backend-loaded config file, for example:
@@ -99,6 +119,23 @@ backend:
 ```
 
 ---
+
+## Running the DevPortal
+
+Start the DevPortal using Docker Compose:
+
+```bash
+docker compose up --no-log-prefix
+```
+
+The DevPortal will be available at:
+
+```
+http://localhost:7007
+```
+
+---
+
 
 ## Import an Existing Repository into the Catalog
 
