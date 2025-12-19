@@ -61,6 +61,30 @@ integrations:
 
 ---
 
+
+## Catalog Provider – Bitbucket Cloud (Required for Auto-Discovery)
+
+```yaml
+catalog:
+  providers:
+    bitbucket:
+      development:
+        workspace: ${BITBUCKET_WORKSPACE}
+        token: ${BITBUCKET_TOKEN}
+
+        catalogPath: /catalog-info.yaml
+
+        schedule:
+          frequency: PT1H
+          timeout: PT15M
+```
+
+This provider will periodically scan all repositories in the workspace and import those containing a `catalog-info.yaml` file.
+
+---
+
+
+
 ## Allow Reading from Bitbucket URLs
 
 The backend must be allowed to read files from Bitbucket:
