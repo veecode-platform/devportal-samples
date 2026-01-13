@@ -1,0 +1,52 @@
+#
+# Starts DevPortal with pretty logging:
+#
+# docker compose up --no-log-prefix
+#
+
+services:
+  devportal:
+    image: veecode/devportal:latest
+    ports:
+      - "7007:7007"
+    environment:
+      - DEVELOPMENT=true
+      - NODE_ENV=development
+      # will use shell value
+      - VEECODE_PROFILE=local
+    volumes:
+      # your config will add/override the default image config
+      - ./app-config.yaml:/app/app-config.local.yaml:ro
+      # dynamic plugins config (just enable/disable plugins)
+      - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
+      # default dynamic plugins config (with default values)
+      #- ./dynamic-plugins.default.yaml:/app/dynamic-plugins.default.yaml:ro
+      # examples folder
+      - ./examples:/app/examples:ro
+      # RBAC policy (remove later)
+      - ./rbac-policy.csv:/app/rbac-policy.csv:ro
+    extra_hosts:
+      - "kubernetes.default:host-gateway"
+
+  # runs kubectl proxy in the container so 
+  kubectl-cli:
+    # image with kubectl
+    image: alpine/kubectl:latest
+    entrypoint: ["/bin/sh", "-c"]
+    # replaces "0.0.0.0" with "kubernetes.default"
+    command:
+      - |
+        mkdir -p /root/.kube
+        sed 's/server: https:\/\/0\.0\.0\.0:\([0-9]*\)/server: https:\/\/kubernetes.default:\1/' /opt/.kube/config | sed '/server: https:\/\/host.docker.internal:/a\    insecure-skip-tls-verify: false' > /root/.kube/config
+        exec kubectl proxy -p 8001
+    volumes:
+      - $HOME/.kube:/opt/.kube:ro
+    network_mode: service:devportal
+
+  #
+  # alternative to kubectl-cli: use kubectl proxy in the host and use socat here
+  #
+  # kubectl-proxy:
+  #   image: alpine/socat:latest
+  #   command: ["tcp-listen:8001,fork,reuseaddr", "tcp-connect:host.docker.internal:8100"]
+  #   network_mode: service:devportal

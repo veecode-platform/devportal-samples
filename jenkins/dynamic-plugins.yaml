@@ -1,0 +1,17 @@
+#
+# This config file will enumerate plugins that:
+#
+# 1. Are bundled in the image file system under ./dynamic-plugins/dist folder.
+# 2. Are not bundled in the image, but are available for download (npm or oci).
+#
+includes:
+  # Always start by merging the defaults that ship inside the image
+  # That makes it easy to enable plugins with defaults that would otherwise
+  # be painful to configure.
+  - dynamic-plugins.default.yaml
+
+plugins:
+  - package: ./dynamic-plugins/dist/backstage-community-plugin-jenkins-backend-dynamic
+    disabled: false
+  - package: ./dynamic-plugins/dist/backstage-community-plugin-jenkins
+    disabled: false
