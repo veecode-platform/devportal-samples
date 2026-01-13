@@ -51,3 +51,8 @@ catalog:
           # supports ISO duration, "human duration" as used in code
           timeout: { minutes: 3 }
         workspace: ${BITBUCKET_WORKSPACE}
+
+  # you can also explicitly import a public repository
+  # locations:
+  #   - type: url
+  #     target: https://bitbucket.org/veecode-testes/rodrigo/src/main/catalog-info.yaml

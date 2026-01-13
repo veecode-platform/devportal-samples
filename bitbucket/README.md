@@ -62,7 +62,7 @@ integrations:
   # nothing
 ```
 
-## Catalog Provider – Bitbucket Cloud (Required for Auto-Discovery)
+## Catalog Provider
 
 ```yaml
 catalog:
@@ -116,9 +116,19 @@ http://localhost:7007
 
 ## Automatic Discovery
 
-DevPortal should be able to automatically discover and import repositories containing a `catalog-info.yaml` file.
+DevPortal should be able to use the [catalog provider](#catalog-provider) to automatically discover and import repositories containing a `catalog-info.yaml` file. Importing them individually is optional.
+
+Locations can also be explictly imported using `app-config.yaml`:
+
+```yaml
+locations:
+  - type: url
+    target: https://bitbucket.org/veecode-testes/rodrigo/src/main/catalog-info.yaml
+```
 
 ## Import an Existing Repository into the Catalog
+
+If you **really** need to import a repository manually:
 
 1. Ensure the repository contains a `catalog-info.yaml` file
 2. Open the DevPortal
