@@ -1,0 +1,92 @@
+global:
+  host: localhost
+  protocol: http
+  port: ':8000'
+  dynamic:
+    plugins:
+      - package: ./dynamic-plugins/dist/backstage-plugin-catalog-backend-module-bitbucket-cloud-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-bitbucket-cloud-dynamic
+        disabled: false
+upstream:
+  enabled: true
+  fullnameOverride: veecode-devportal
+  commonLabels:
+    backstage.io/kubernetes-id: cluster-vkdr-local
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    tls:
+      enabled: true
+      secretName: veecode-devportal-tls
+  backstage:
+    image:
+      repository: veecode/devportal
+      tag: 1.2.24
+    # criar secret e profile no k8s
+    # extraEnvVarsSecrets:
+    #   - backstage-secrets
+    extraEnvVars:
+      - name: VEECODE_PROFILE
+        value: "ldap"    
+      - name: LDAP_URL
+        value: "ldap://openldap.openldap.svc.cluster.local:389"  
+      - name: LDAP_DN
+        value: "cn=admin,dc=vee,dc=code"
+      - name: LDAP_SECRET
+        value: "admin"
+      - name: LDAP_USERS_BASE_DN
+        value: "ou=People,dc=vee,dc=code"
+      - name: LDAP_GROUPS_BASE_DN
+        value: "ou=Groups,dc=vee,dc=code"
+      - name: LDAP_USERS_FILTER
+        value: "(uid=*)"
+      - name: LDAP_GROUPS_FILTER
+        value: "(objectClass=groupOfNames)"
+      - name: NODE_ENV
+        value: "development"
+      - name: BITBUCKET_WORKSPACE
+        value: "andrevtg"
+    command: null
+    args: null
+    containerSecurityContext:
+      readOnlyRootFilesystem: false
+    podLabels:
+      backstage.io/kubernetes-id: cluster-vkdr-local
+    extraVolumes:
+      - name: app-config
+        configMap:
+          name: veecode-devportal-app-config
+      - name: dynamic-plugins
+        configMap:
+          name: veecode-devportal-dynamic-plugins
+      - name: temp
+        emptyDir: {}
+    extraVolumeMounts:
+      - name: app-config
+        mountPath: /app/app-config.local.yaml
+        subPath: app-config.yaml
+      - name: dynamic-plugins
+        mountPath: /app/dynamic-plugins.yaml
+        subPath: dynamic-plugins.yaml
+      - name: temp
+        mountPath: /tmp
+    initContainers: []
+    appConfig:
+      app:
+        title: "Devportal Platform (VKDR)"
+      permission:
+        enabled: false
+      catalog:
+        providers:
+          bitbucketCloud:
+            bitbucketCloudDemo: # identifies your ingested dataset
+              catalogPath: /catalog-info.yaml # default value
+              schedule: # same options as in SchedulerServiceTaskScheduleDefinition
+                # supports cron, ISO duration, "human duration" as used in code
+                frequency: { minutes: 30 }
+                # supports ISO duration, "human duration" as used in code
+                timeout: { minutes: 3 }
+              workspace: ${BITBUCKET_WORKSPACE}
