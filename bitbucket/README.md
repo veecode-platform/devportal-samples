@@ -5,18 +5,16 @@ This quickstart shows how to configure **Bitbucket Cloud** integration in **VeeC
 - Import existing repositories into the Catalog
 - Use Bitbucket actions in the Scaffolder
 
-This setup is independent of any profile (`default`, `ldap`, etc).
+Note: there is no ready-to-use VEECODE_PROFILE for bitbucket, so we need to configure it manually.
 
 ---
 
 ## Prerequisites
 
 - Docker Desktop (or compatible container engine)
-- VeeCode DevPortal running locally
-- A Bitbucket Cloud workspace
-- At least one Bitbucket repository
-
----
+- A public Bitbucket Cloud workspace
+- At least one public repository in the above workspace
+- A valid `catalog-info.yaml` file in the above repository
 
 ## Environment Variables
 
@@ -26,23 +24,20 @@ Required:
 export BITBUCKET_WORKSPACE=<your-bitbucket-workspace>
 ```
 
+---
 
-## docker-compose.yml
+## Configure DevPortal
 
-Add the variables to the DevPortal service:
+Check `docker-compose.yml` for the environment variables:
 
 ```yaml
 services:
   devportal:
     environment:
-      - BITBUCKET_WORKSPACE=${BITBUCKET_WORKSPACE}
+      - BITBUCKET_WORKSPACE
 ```
 
----
-
-## Dynamic Plugins (Required)
-
-Enable the Bitbucket Cloud dynamic plugins by editing `dynamic-plugins.yaml`:
+Check the Bitbucket Cloud dynamic plugins by editing `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
@@ -58,56 +53,39 @@ These plugins enable:
 - Automatic repository discovery (Catalog Provider)
 - Bitbucket actions in the Scaffolder
 
----
-
-## Backend Configuration
-
-The configuration below can be added to any backend-loaded config file, for example:
-
-- `app-config.yaml`
-- `app-config.production.yaml`
-- `app-config.local.yaml`
-
----
-
 ## Bitbucket Cloud Integration
+
+We can ignore this section, as it is not required for Bitbucket Cloud integration when reading only public repositories.
 
 ```yaml
 integrations:
-  bitbucket:
-    - host: bitbucket.org
+  # nothing
 ```
-
-
----
-
 
 ## Catalog Provider – Bitbucket Cloud (Required for Auto-Discovery)
 
 ```yaml
 catalog:
   providers:
-    bitbucket:
-      development:
+    bitbucketCloud:
+      bitbucketCloudDemo: # identifies your ingested dataset
+        catalogPath: /catalog-info.yaml # default value
+        # filters: # optional
+        #   projectKey: '^apis-.*$' # optional; RegExp
+        #   repoSlug: '^service-.*$' # optional; RegExp
+        schedule: # same options as in SchedulerServiceTaskScheduleDefinition
+          # supports cron, ISO duration, "human duration" as used in code
+          frequency: { minutes: 30 }
+          # supports ISO duration, "human duration" as used in code
+          timeout: { minutes: 3 }
         workspace: ${BITBUCKET_WORKSPACE}
-
-
-        catalogPath: /catalog-info.yaml
-
-        schedule:
-          frequency: PT1H
-          timeout: PT15M
 ```
 
 This provider will periodically scan all repositories in the workspace and import those containing a `catalog-info.yaml` file.
 
----
-
-
-
 ## Allow Reading from Bitbucket URLs
 
-The backend must be allowed to read files from Bitbucket:
+If you get errors from blocking requests to Bitbucket, you can add the following to `app-config.yaml`:
 
 ```yaml
 backend:
@@ -120,7 +98,7 @@ backend:
 
 ---
 
-## Running the DevPortal
+## Start DevPortal
 
 Start the DevPortal using Docker Compose:
 
@@ -130,12 +108,15 @@ docker compose up --no-log-prefix
 
 The DevPortal will be available at:
 
-```
+```pre
 http://localhost:7007
 ```
 
 ---
 
+## Automatic Discovery
+
+DevPortal should be able to automatically discover and import repositories containing a `catalog-info.yaml` file.
 
 ## Import an Existing Repository into the Catalog
 
@@ -159,6 +140,8 @@ https://bitbucket.org/my-workspace/my-api/raw/main/catalog-info.yaml
 ---
 
 ## Minimal catalog-info.yaml Example
+
+If you have access to repos you may add similar files like this:
 
 ```yaml
 apiVersion: backstage.io/v1alpha1

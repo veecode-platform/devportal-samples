@@ -11,9 +11,8 @@ services:
       - "7007:7007"
     environment:
       - NODE_ENV=development
-      - BITBUCKET_WORKSPACE
       # will use shell value
-      #- VEECODE_PROFILE=ldap
+      - BITBUCKET_WORKSPACE
     volumes:
       # your config will add/override the default image config
       - ./app-config.yaml:/app/app-config.local.yaml:ro
