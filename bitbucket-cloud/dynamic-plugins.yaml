@@ -1,0 +1,12 @@
+#
+# This is a dynamic plugins config file
+#
+includes:
+  # Always start by merging the defaults that ship inside the image
+  - dynamic-plugins.default.yaml
+
+plugins:
+  - package: ./dynamic-plugins/dist/backstage-plugin-catalog-backend-module-bitbucket-cloud-dynamic
+    disabled: false
+  - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-bitbucket-cloud-dynamic
+    disabled: false

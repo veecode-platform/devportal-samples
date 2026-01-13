@@ -1,5 +1,5 @@
 #
-# Starts DevPortal with LDAP authentication + org sync via the built-in "ldap" profile:
+# Starts DevPortal with Bitbucket Server (self-hosted) integration:
 #
 # docker compose up --no-log-prefix
 #
@@ -11,8 +11,13 @@ services:
       - "7007:7007"
     environment:
       - NODE_ENV=development
-      # will use shell value
-      - BITBUCKET_WORKSPACE
+      # will use shell values
+      - BITBUCKET_SERVER_HOST
+      - BITBUCKET_SERVER_API_URL
+      - BITBUCKET_SERVER_TOKEN
+      # alternative: username/password authentication
+      # - BITBUCKET_SERVER_USERNAME
+      # - BITBUCKET_SERVER_PASSWORD
     volumes:
       # your config will add/override the default image config
       - ./app-config.yaml:/app/app-config.local.yaml:ro

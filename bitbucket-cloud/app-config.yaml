@@ -1,14 +1,12 @@
-# bitbucket overrides to bundled config
+# Bitbucket Cloud overrides to bundled config
 
-# choose bitbucketCloud or bitbucketServer
-
-# regarding bitbucketCloud, according to docs:
+# According to docs:
 # A public Bitbucket Cloud provider is added automatically at startup 
 # for convenience, so you only need to list it if you want to supply credentials.
 # if you omit "bitbucketCloud" it will only list public repositories
 integrations:
   #
-  # ABOUT bitbucketCloud: decide which authentication method to use
+  # ABOUT bitbucketCloud: decide which credentials to use.
   # PICK ONE: user/pwd, OR token, OR clientId/clientSecret
   #
   # username: user email
@@ -23,19 +21,6 @@ integrations:
   #     token: ${BITBUCKET_TOKEN}
   #     clientId: ${BITBUCKET_CLIENT_ID}
   #     clientSecret: ${BITBUCKET_CLIENT_SECRET}
-  #
-  # ABOUT bitbucketServer: please check API version available
-  # PICK ONE: token, OR username/password
-  # token: requires bitbucket premium
-  # username and password: "old style" authentication, but works
-  # no credentials: will list public repositories
-  #
-  # bitbucketServer:
-  #   - host: bitbucket.mycompany.com
-  #     apiBaseUrl: https://bitbucket.mycompany.com/rest/api/1.0
-  #     token: ${BITBUCKET_TOKEN}
-  #     username: ${BITBUCKET_SERVER_USERNAME}
-  #     password: ${BITBUCKET_SERVER_PASSWORD}
 
 catalog:
   providers:

@@ -25,7 +25,8 @@ Each example typically contains:
 | [appstarter](appstarter/) | Minimal starter configuration |
 | [github](github/) | GitHub OAuth authentication and integrations |
 | [azure](azure/) | Azure DevOps authentication and integrations |
-| [bitbucket](bitbucket/) | Bitbucket Cloud/Server integration |
+| [bitbucket-cloud](bitbucket-cloud/) | Bitbucket Cloud (SaaS) integration |
+| [bitbucket-server](bitbucket-server/) | Bitbucket Server (self-hosted) integration |
 | [ldap](ldap/) | LDAP authentication and organization sync |
 | [jenkins](jenkins/) | Jenkins CI/CD integration |
 | [sonarqube](sonarqube/) | SonarQube code quality integration |

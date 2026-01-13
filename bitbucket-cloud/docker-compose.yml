@@ -1,0 +1,20 @@
+#
+# Starts DevPortal with Bitbucket Cloud integration:
+#
+# docker compose up --no-log-prefix
+#
+
+services:
+  devportal:
+    image: veecode/devportal:latest
+    ports:
+      - "7007:7007"
+    environment:
+      - NODE_ENV=development
+      # will use shell value
+      - BITBUCKET_WORKSPACE
+    volumes:
+      # your config will add/override the default image config
+      - ./app-config.yaml:/app/app-config.local.yaml:ro
+      # dynamic plugins config (just enable/disable plugins)
+      - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
