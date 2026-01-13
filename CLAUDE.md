@@ -4,45 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **VeeCode DevPortal Examples Repository** - a collection of Docker-based configuration samples demonstrating how to run VeeCode DevPortal (a Backstage-based developer portal) with different integrations and authentication providers.
+This is a **configuration-only repository** containing Docker Compose samples for VeeCode DevPortal (a Backstage-based developer portal). There is no build system, package.json, or test infrastructure - only YAML configuration files.
 
-This is **not a Node.js project** - it contains Docker Compose configurations and YAML files only. There is no build system, package.json, or test infrastructure.
-
-## Common Commands
-
-Start any example:
-
-```bash
-cd <example-directory>
-docker compose up --no-log-prefix
-```
-
-Reload dynamic plugins without restart:
-
-```bash
-docker compose exec devportal /app/install-dynamic-plugins.sh /app/dynamic-plugins-root
-```
-
-Get authentication token for API testing:
-
-```bash
-USER_TOKEN="$(curl -s -X POST http://localhost:7007/api/auth/guest/refresh \
-  -H 'Content-Type: application/json' -d '{}' | jq -r '.backstageIdentity.token')"
-```
-
-Test backend endpoints:
-
-```bash
-curl -H "Authorization: Bearer $USER_TOKEN" http://localhost:7007/api/catalog/entities
-curl http://localhost:7007/healthcheck
-curl http://localhost:7007/version
-```
+See [README.md](README.md) for available examples and common commands.
 
 ## Architecture
 
 ### Profile System
 
-All examples use `VEECODE_PROFILE` environment variable to select bundled configurations:
+All examples use the `VEECODE_PROFILE` environment variable to select bundled configurations:
 
 - `github` - GitHub OAuth + integrations
 - `azure` - Azure DevOps authentication
@@ -59,18 +29,17 @@ All examples use `VEECODE_PROFILE` environment variable to select bundled config
 4. Optional `app-config.local.yaml` for final customization
 5. Environment variable interpolation at runtime
 
-### Example Structure
+### Example Directory Pattern
 
-Each example directory follows a consistent pattern:
+Each example follows this structure:
 
 - `docker-compose.yml` - Service definition with environment variables
-- `dynamic-plugins.yaml` - Enabled/disabled plugins configuration
+- `dynamic-plugins.yaml` - Plugin enable/disable configuration
 - `app-config.yaml` - Application overrides (optional)
-- `README.md` - Setup instructions (optional)
 
 ### Dynamic Plugins
 
-Plugins are pre-installed in the Docker image at `dynamic-plugins-root`. The `dynamic-plugins.yaml` file controls which plugins are active and can include bundled defaults:
+Plugins are pre-installed in the Docker image at `dynamic-plugins-root`. The `dynamic-plugins.yaml` controls activation:
 
 ```yaml
 includes:
@@ -82,9 +51,9 @@ plugins:
 
 ### RBAC
 
-Role-based access control uses Casbin format in `rbac-policy.csv` files. Roles include `admin`, `developer`, etc., with permissions for catalog, scaffolder, kubernetes operations.
+Role-based access control uses Casbin format in `rbac-policy.csv` files with roles like `admin` and `developer`.
 
-## Key Environment Variables by Integration
+## Key Environment Variables
 
 | Integration | Variables |
 |-------------|-----------|
@@ -94,9 +63,3 @@ Role-based access control uses Casbin format in `rbac-policy.csv` files. Roles i
 | Jenkins | `JENKINS_URL`, `JENKINS_USERNAME`, `JENKINS_TOKEN` |
 | SonarQube | `SONAR_TOKEN` |
 | Bitbucket | `BITBUCKET_WORKSPACE`, `BITBUCKET_USERNAME`, `BITBUCKET_TOKEN`, `BITBUCKET_CLIENT_ID` |
-
-## Documentation
-
-- [Profiles Documentation](https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles)
-- [GitHub Integration](https://docs.platform.vee.codes/devportal/integrations/GitHub/)
-- [Azure Integration](https://docs.platform.vee.codes/devportal/integrations/Azure/)
