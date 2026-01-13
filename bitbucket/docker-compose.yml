@@ -11,6 +11,7 @@ services:
       - "7007:7007"
     environment:
       - NODE_ENV=development
+      - BITBUCKET_WORKSPACE
       # will use shell value
       #- VEECODE_PROFILE=ldap
     volumes:
