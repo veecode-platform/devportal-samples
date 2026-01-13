@@ -13,7 +13,7 @@ integrations:
     - host: ${BITBUCKET_SERVER_HOST}
       apiBaseUrl: ${BITBUCKET_SERVER_API_URL}
       # PICK ONE: token OR username/password
-      token: ${BITBUCKET_SERVER_TOKEN}
+      # token: ${BITBUCKET_SERVER_TOKEN}
       # username: ${BITBUCKET_SERVER_USERNAME}
       # password: ${BITBUCKET_SERVER_PASSWORD}
 
