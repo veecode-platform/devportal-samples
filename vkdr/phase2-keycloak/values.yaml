@@ -1,0 +1,49 @@
+global:
+  host: localhost
+  protocol: http
+  port: ':8000'
+  # dynamic:
+  #   plugins:
+  #     - package: ./dynamic-plugins/dist/backstage-plugin-catalog-backend-module-bitbucket-cloud-dynamic
+  #       disabled: false
+  #     - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-bitbucket-cloud-dynamic
+  #       disabled: false
+upstream:
+  enabled: true
+  fullnameOverride: veecode-devportal
+  ingress:
+    enabled: true
+    tls:
+      enabled: false
+  backstage:
+    image:
+      repository: veecode/devportal
+      tag: 1.3.0
+    # criar secret e profile no k8s
+    extraEnvVarsSecrets:
+      - backstage-secrets
+    extraEnvVars:
+      - name: VEECODE_PROFILE
+        value: "keycloak"
+      - name: NODE_ENV
+        value: "development"
+    command: null
+    args: null
+    containerSecurityContext:
+      readOnlyRootFilesystem: false
+    extraVolumes:
+      - name: app-config
+        configMap:
+          name: veecode-devportal-app-config
+      - name: temp
+        emptyDir: {}
+    extraVolumeMounts:
+      - name: app-config
+        mountPath: /app/app-config.local.yaml
+        subPath: app-config.yaml
+      - name: temp
+        mountPath: /tmp
+    initContainers: []
+    appConfig:
+      app:
+        title: "Devportal Platform (VKDR)"
