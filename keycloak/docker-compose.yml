@@ -1,0 +1,31 @@
+#
+# Starts DevPortal with hot reloading and pretty logging:
+#
+# docker compose up --no-log-prefix
+#
+# Changes to dynamic-plugins*.yaml will be processed into app-config running this:
+#
+# docker compose exec devportal /app/install-dynamic-plugins.sh /app/dynamic-plugins-root
+#
+
+services:
+  devportal:
+    image: veecode/devportal:latest
+    ports:
+      - "7007:7007"
+    environment:
+      NODE_ENV: development
+      VEECODE_PROFILE: keycloak
+      LOG_LEVEL: debug
+      # reading from .env file
+      AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET}
+      KEYCLOAK_BASE_URL: ${KEYCLOAK_BASE_URL}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      #KEYCLOAK_LOGIN_REALM: ${KEYCLOAK_LOGIN_REALM}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+    #volumes:
+      # your config will add/override the default image config
+      # - ./app-config.yaml:/app/app-config.local.yaml:ro
+      # dynamic plugins config (just enable/disable plugins)
+      #- ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
