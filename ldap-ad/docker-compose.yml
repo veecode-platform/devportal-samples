@@ -1,0 +1,50 @@
+#
+# Starts DevPortal with LDAP authentication + org sync via the built-in "ldap" profile:
+#
+# docker compose up --no-log-prefix
+#
+
+services:
+  devportal:
+    image: veecode/devportal:latest
+    ports:
+      - "7007:7007"
+    environment:
+      - NODE_ENV=development
+      # will use shell value
+      - VEECODE_PROFILE=ldap
+      # LDAP
+      - LDAP_URL=ldap://dc1:389
+      - LDAP_DN=cn=admin,dc=samdom,dc=example,dc=com
+      - LDAP_SECRET=Passw0rd
+      - LDAP_USERS_BASE_DN=dc=samdom,dc=example,dc=com
+      - LDAP_USERS_FILTER=(objectClass=user)
+      - LDAP_GROUPS_BASE_DN=dc=samdom,dc=example,dc=com
+      - LDAP_GROUPS_FILTER=(objectClass=group)
+
+  dc1:
+    image: diegogslomp/samba-ad-dc
+    #hostname: DC1
+    #privileged: true
+    #restart: unless-stopped
+    #network_mode: host
+    cap_add:
+      - SYS_ADMIN
+    command: >-
+      bash -c "[ -f /usr/local/samba/etc/smb.conf ] || samba-domain-provision && samba -F"
+    ports:
+      - "389:8389"
+    environment:
+      - REALM=SAMDOM.EXAMPLE.COM
+      - DOMAIN=SAMDOM
+      - ADMIN_PASS=Passw0rd
+      - DNS_FORWARDER=8.8.8.8
+    volumes:
+      - dc1_etc:/usr/local/samba/etc
+      - dc1_private:/usr/local/samba/private
+      - dc1_var:/usr/local/samba/var
+  
+volumes:
+  dc1_etc:
+  dc1_private:
+  dc1_var:
