@@ -1,0 +1,60 @@
+# VeeCode `ldap` profile equivalent, tuned for Samba AD / Active Directory.
+# Mounted over /app/app-config.ldap.yaml so it wins over the image default (uid-based OpenLDAP).
+
+signInPage: ldap
+
+auth:
+  environment: development
+  providers:
+    ldap:
+      development:
+        cookies:
+          secure: false
+          field: "backstage-token"
+
+        ldapAuthenticationOptions:
+          userSearchBase: "${LDAP_USERS_BASE_DN}"
+          usernameAttribute: sAMAccountName
+          adminDn: "${LDAP_DN}"
+          adminPassword: "${LDAP_SECRET}"
+          ldapOpts:
+            url: "${LDAP_URL}"
+            tlsOptions:
+              rejectUnauthorized: false
+
+catalog:
+  providers:
+    ldapOrg:
+      default:
+        target: "${LDAP_URL}"
+        bind:
+          dn: "${LDAP_DN}"
+          secret: "${LDAP_SECRET}"
+        users:
+          - dn: "${LDAP_USERS_BASE_DN}"
+            options:
+              filter: "${LDAP_USERS_FILTER}"
+              scope: sub
+            map:
+              rdn: cn
+              name: sAMAccountName
+              description: description
+              displayName: displayName
+              email: mail
+              memberOf: memberOf
+        groups:
+          - dn: "${LDAP_GROUPS_BASE_DN}"
+            options:
+              filter: "${LDAP_GROUPS_FILTER}"
+              scope: sub
+            map:
+              rdn: cn
+              name: cn
+              description: description
+              displayName: cn
+              memberOf: memberOf
+              members: member
+        schedule:
+          # Short interval for local AD labs: new samba-tool users appear in catalog without waiting 1h.
+          frequency: PT2M
+          timeout: PT15M

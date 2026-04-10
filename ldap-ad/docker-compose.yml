@@ -9,13 +9,16 @@ services:
     image: veecode/devportal:latest
     ports:
       - "7007:7007"
+    volumes:
+      # Replaces the image’s uid-centric ldap profile (merged last by entrypoint).
+      - ./app-config.ldap.yaml:/app/app-config.ldap.yaml:ro
     environment:
       - NODE_ENV=development
       # will use shell value
       - VEECODE_PROFILE=ldap
       # LDAP
       - LDAP_URL=ldap://dc1:389
-      - LDAP_DN=cn=admin,dc=samdom,dc=example,dc=com
+      - LDAP_DN=CN=Administrator,CN=Users,DC=samdom,DC=example,DC=com
       - LDAP_SECRET=Passw0rd
       - LDAP_USERS_BASE_DN=dc=samdom,dc=example,dc=com
       - LDAP_USERS_FILTER=(objectClass=user)
@@ -33,12 +36,16 @@ services:
     command: >-
       bash -c "[ -f /usr/local/samba/etc/smb.conf ] || samba-domain-provision && samba -F"
     ports:
-      - "389:8389"
+      # host:container — reach LDAP from the host as localhost:8389
+      - "8389:389"
     environment:
       - REALM=SAMDOM.EXAMPLE.COM
       - DOMAIN=SAMDOM
       - ADMIN_PASS=Passw0rd
       - DNS_FORWARDER=8.8.8.8
+      # Otherwise provision sets interfaces=lo eth0@ifN and Samba only listens on loopback,
+      # so other containers (and published ports) cannot reach LDAP.
+      - BIND_NETWORK_INTERFACES=false
     volumes:
       - dc1_etc:/usr/local/samba/etc
       - dc1_private:/usr/local/samba/private

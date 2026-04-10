@@ -41,8 +41,11 @@ The `dc1` service runs Samba as an Active Directory Domain Controller. On first 
 | `DOMAIN` | `SAMDOM` |
 | `ADMIN_PASS` | `Passw0rd` |
 | `DNS_FORWARDER` | `8.8.8.8` |
+| `BIND_NETWORK_INTERFACES` | `false` | Skips `bind interfaces only` with a veth name like `eth0@if…` on Docker bridge networks; without this, LDAP listens only on loopback and peer containers cannot connect. |
 
 The container requires the `SYS_ADMIN` Linux capability (`cap_add`) so that Samba can set NT ACLs on the SYSVOL filesystem during provisioning.
+
+If you previously started `dc1` **without** `BIND_NETWORK_INTERFACES=false`, the domain may have been provisioned with a broken `interfaces=` line in `smb.conf`. Run `docker compose down -v` once to recreate the named volumes, then `docker compose up` again.
 
 Three named volumes (`dc1_etc`, `dc1_private`, `dc1_var`) persist the domain database across restarts.
 
@@ -52,8 +55,8 @@ DevPortal connects to the Samba AD DC using standard LDAP environment variables:
 
 | Variable | Value | Notes |
 | --- | --- | --- |
-| `LDAP_URL` | `ldap://dc1:389` | Resolved via Docker Compose networking |
-| `LDAP_DN` | `cn=admin,dc=samdom,dc=example,dc=com` | Bind DN (AD Administrator) |
+| `LDAP_URL` | `ldap://dc1:389` | Container-to-container (port 389 inside `dc1`). From the host, LDAP is published as **8389** → 389 (`8389:389`). |
+| `LDAP_DN` | `CN=Administrator,CN=Users,DC=samdom,DC=example,DC=com` | Bind DN (built-in domain Administrator from Samba provision) |
 | `LDAP_SECRET` | `Passw0rd` | Must match `ADMIN_PASS` |
 | `LDAP_USERS_BASE_DN` | `dc=samdom,dc=example,dc=com` | Search base for users |
 | `LDAP_USERS_FILTER` | `(objectClass=user)` | AD user object class |
@@ -61,6 +64,10 @@ DevPortal connects to the Samba AD DC using standard LDAP environment variables:
 | `LDAP_GROUPS_FILTER` | `(objectClass=group)` | AD group object class |
 
 > **Note:** The filters use AD-style object classes (`user`, `group`) instead of the OpenLDAP equivalents (`inetOrgPerson`, `groupOfNames`).
+
+The compose file mounts `./app-config.ldap.yaml` over the image default so catalog auth and org sync use **Active Directory attributes** (`sAMAccountName`, subtree search, etc.). Without it, the stock profile expects `uid` and sync fails against Samba AD.
+
+You may see catalog **warnings** for built-in Windows groups whose display names contain spaces (Backstage entity names must match `[a-zA-Z0-9][-_.a-zA-Z0-9]*`). Tighten `LDAP_GROUPS_FILTER` if you want only your own groups.
 
 ## Running the Example
 
@@ -72,6 +79,17 @@ On first run, `dc1` will provision the Active Directory domain — this can take
 
 The DevPortal will be available at: **http://localhost:7007**
 
+### LDAP sign-in (important)
+
+The auth plugin resolves the user with a single LDAP attribute: **`sAMAccountName`** (see `usernameAttribute` in `app-config.ldap.yaml`).
+
+- Use the **short logon name** only, e.g. **`johndoe`** — the same value as in `samba-tool user add johndoe`.
+- Do **not** use the **UPN** (`johndoe@samdom.example.com`) or the **display name** (`John Doe`) in the username field; the lookup is `(sAMAccountName=<what you typed>)` and those values will not match.
+
+If you prefer sign-in with UPN, change `usernameAttribute` to `userPrincipalName` in `app-config.ldap.yaml` and restart DevPortal (users must then type the full UPN).
+
+**Catalog sync and login:** LDAP sign-in only succeeds if a **User** entity with `metadata.name` equal to your `sAMAccountName` already exists in the Backstage catalog (ingested by `LdapOrgEntityProvider`). If you **create AD users after** DevPortal has started, either wait for the next LDAP sync (this example uses **every 2 minutes** in `app-config.ldap.yaml`) or run `docker compose restart devportal` once to force a refresh on startup.
+
 ## Managing Users and Groups
 
 After the domain is provisioned you can use the `samba-tool` CLI inside the `dc1` container to create users and groups:
@@ -79,7 +97,7 @@ After the domain is provisioned you can use the `samba-tool` CLI inside the `dc1
 ```bash
 # Create a user
 docker compose exec dc1 samba-tool user add johndoe --given-name=John --surname=Doe --mail-address=john@example.com
-
+#Passw0rd
 # Create a group
 docker compose exec dc1 samba-tool group add developers
 docker compose exec dc1 samba-tool group add backstage-admins
@@ -98,7 +116,7 @@ You can use ldapsearch too:
 
 ```bash
 ldapsearch -H ldap://localhost:8389 \
-  -x -D "cn=admin,dc=samdom,dc=example,dc=com" -w Passw0rd -b "dc=samdom,dc=example,dc=com"
+  -x -D "CN=Administrator,CN=Users,DC=samdom,DC=example,DC=com" -w Passw0rd -b "dc=samdom,dc=example,dc=com"
 ```
 
 
@@ -123,6 +141,9 @@ Common causes:
 - Wrong `LDAP_DN` / `LDAP_SECRET` for the bind user
 - Base DNs don't match the domain structure
 - Filters don't match the AD schema (use `objectClass=user` / `objectClass=group` for AD)
+- **Wrong username on the sign-in form:** DevPortal logs may show `LdapAuthenticationError: user not found or usernameAttribute is wrong`. Use **`sAMAccountName`** (e.g. `johndoe`), not UPN or full name — see [LDAP sign-in](#ldap-sign-in-important) above.
+
+`POST /api/auth/ldap/refresh` returning **401** with no session cookie is normal before you log in. **500** with the message above usually means the user lookup failed (username format) or bad password after the user was found.
 
 ### Resetting the domain
 
