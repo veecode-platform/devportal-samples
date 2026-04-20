@@ -33,7 +33,7 @@ services:
     command: >-
       bash -c "[ -f /usr/local/samba/etc/smb.conf ] || samba-domain-provision && samba -F"
     ports:
-      - "389:8389"
+      - "8389:389"
     environment:
       - REALM=SAMDOM.EXAMPLE.COM
       - DOMAIN=SAMDOM
