@@ -1,0 +1,5 @@
+# Local overrides for this sample — loaded after the ldap-ad profile.
+# Left intentionally minimal: add keys here to patch auth, catalog, or any
+# other Backstage config without rebuilding the image.
+# VeeCode `ldap` profile equivalent, tuned for Samba AD / Active Directory.
+# Mounted over /app/app-config.ldap.yaml so it wins over the image default (uid-based OpenLDAP).

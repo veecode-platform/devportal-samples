@@ -1,0 +1,67 @@
+global:
+  dynamic:
+    plugins:
+      - package: oci://quay.io/veecode/backstage:bs_1.49.4!backstage-plugin-mcp-actions-backend
+        disabled: true
+      - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras
+        disabled: true
+      - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras
+        disabled: true
+      - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras
+        disabled: true
+upstream:
+  enabled: true
+  fullnameOverride: veecode-devportal
+  commonLabels:
+    backstage.io/kubernetes-id: cluster-vkdr-local
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: "kong"
+      # konghq.com/strip-path: "true"
+      # konghq.com/preserve-host: "true"
+      # Adicione outras anotações do Kong conforme necessário
+  backstage:
+    image:
+      repository: veecode/devportal
+      tag: 1.5.8
+    # criar secret e profile no k8s
+    #extraEnvVarsSecrets:
+    #   - backstage-secrets
+    extraEnvVars:
+      - name: VEECODE_PROFILE
+        value: "ldap-ad"
+      - name: LDAP_URL
+        value: "ldap://host.k3d.internal:8389"
+      - name: LDAP_DN
+        value: "CN=Administrator,CN=Users,DC=samdom,DC=example,DC=com"
+      - name: LDAP_SECRET
+        value: "Passw0rd"
+      - name: LDAP_USERS_BASE_DN
+        value: "dc=samdom,dc=example,dc=com"
+      - name: LDAP_GROUPS_BASE_DN
+        value: "dc=samdom,dc=example,dc=com"
+      - name: LDAP_USERS_FILTER
+        value: "(&(objectClass=user)(!(objectClass=computer))(sAMAccountName=*)(mail=*))"
+      - name: LDAP_GROUPS_FILTER
+        value: "(objectClass=group)"
+      - name: NODE_ENV
+        value: "development"
+      # - name: BITBUCKET_SERVER_HOST
+      #   value: "bitbucket.rte.com.br"
+      # - name: BITBUCKET_SERVER_API_URL
+      #   value: "https://bitbucket.rte.com.br/rest/api/1.0"
+    podLabels:
+      backstage.io/kubernetes-id: cluster-vkdr-local
+    appConfig:
+      app:
+        title: "Devportal Platform (VKDR)"
+      catalog: 
+        providers:
+          ldapOrg: # importação LDAP → entidades User/Group no catálogo
+            default: # instância default do provider ldapOrg
+              schedule: # cadência do LdapOrgEntityProvider (ajuste conforme necessidade)
+                frequency: PT2M
+                timeout: PT15M
+      permission:
+        enabled: false

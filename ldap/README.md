@@ -104,7 +104,7 @@ If you’re using OpenLDAP and want a reference implementation of a local direct
 Example values for the `vkdr` OpenLDAP setup above (adjust to your directory if using a different server):
 
 ```bash
-export LDAP_URL="ldap://localhost:9000"
+export LDAP_URL="ldap://host.docker.internal:9000"
 export LDAP_DN='cn=admin,dc=vee,dc=codes'
 export LDAP_SECRET='admin'
 

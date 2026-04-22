@@ -9,15 +9,18 @@ services:
     image: veecode/devportal:latest
     ports:
       - "7007:7007"
+    volumes:
+      # Minimal stub for local patches — disabling plugins that require MCP.
+      - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
     environment:
       - NODE_ENV=development
-      # will use shell value
+      # LDAP profile
       - VEECODE_PROFILE=ldap
       # LDAP
-      - LDAP_URL
-      - LDAP_DN
-      - LDAP_SECRET
-      - LDAP_USERS_BASE_DN
-      - LDAP_USERS_FILTER
-      - LDAP_GROUPS_BASE_DN
-      - LDAP_GROUPS_FILTER
+      - LDAP_URL=ldap://host.docker.internal:9000
+      - LDAP_DN=cn=admin,dc=vee,dc=codes
+      - LDAP_SECRET=admin
+      - LDAP_USERS_BASE_DN=ou=People,dc=vee,dc=codes
+      - LDAP_USERS_FILTER=(uid=*)
+      - LDAP_GROUPS_BASE_DN=ou=Groups,dc=vee,dc=codes
+      - LDAP_GROUPS_FILTER=(objectClass=groupOfNames)

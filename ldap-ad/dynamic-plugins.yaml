@@ -1,0 +1,16 @@
+#
+# This is a dynamic plugins config file bundled with the devportal-base image.
+# It is used to define the behaviour of the dynamic plugins system pre-startup.
+#
+includes:
+  - dynamic-plugins.default.yaml
+
+plugins:
+  - package: oci://quay.io/veecode/backstage:bs_1.49.4!backstage-plugin-mcp-actions-backend
+    disabled: true
+  - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras
+    disabled: true
+  - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras
+    disabled: true
+  - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras
+    disabled: true
