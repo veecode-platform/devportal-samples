@@ -1,0 +1,10 @@
+
+includes:
+  # Always start by merging the defaults that ship inside the image
+  # That makes it easy to enable plugins with defaults that would otherwise
+  # be painful to configure.
+  - dynamic-plugins.default.yaml
+
+# plugins:
+#   - package: ./dynamic-plugins/dist/roadiehq-backstage-plugin-security-insights-dynamic
+#     disabled: false
