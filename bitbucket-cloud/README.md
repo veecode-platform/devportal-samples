@@ -5,7 +5,7 @@ This quickstart shows how to configure **Bitbucket Cloud** integration in **VeeC
 - Import existing repositories into the Catalog
 - Use Bitbucket actions in the Scaffolder
 
-Note: there is no ready-to-use preset (`VEECODE_PRESETS`) for Bitbucket, so we configure it manually — this sample mounts an `app-config.local.yaml` and enables the Bitbucket Cloud dynamic plugins in `dynamic-plugins.yaml`.
+Note: there is no ready-to-use preset (`VEECODE_PRESETS`) for Bitbucket, so we configure it manually — this sample runs the `recommended,veecode-theme` baseline presets and mounts an `app-config.local.yaml` with the Bitbucket Cloud integration. The Bitbucket Cloud catalog/scaffolder plugins ship as pre-installed marketplace extensions (enable them from the Marketplace page).
 
 ---
 
@@ -37,21 +37,22 @@ services:
       - BITBUCKET_WORKSPACE
 ```
 
-Check the Bitbucket Cloud dynamic plugins by editing `dynamic-plugins.yaml`:
+The Bitbucket Cloud catalog/scaffolder plugins ship as **pre-installed marketplace
+extensions** in the image (the `recommended` preset wires the marketplace + extensions
+backend). Enable them from the **Marketplace** page in the running portal:
 
-```yaml
-plugins:
-  - package: ./dynamic-plugins/dist/backstage-plugin-catalog-backend-module-bitbucket-cloud-dynamic
-    disabled: false
-
-  - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-bitbucket-cloud-dynamic
-    disabled: false
-```
+- `backstage-plugin-catalog-backend-module-bitbucket-cloud` (Bitbucket Cloud Discovery)
+- `backstage-plugin-scaffolder-backend-module-bitbucket-cloud` (Bitbucket Cloud Software Template Actions)
 
 These plugins enable:
 
 - Automatic repository discovery (Catalog Provider)
 - Bitbucket actions in the Scaffolder
+
+> Note (V2): unlike the V1 sample, you do NOT hand-list these in
+> `dynamic-plugins.yaml` via `./dynamic-plugins/dist/...` refs. They are not
+> available as a static OCI ref in the published image — they install through
+> the marketplace. See the flag note at the top of `dynamic-plugins.yaml`.
 
 ## Bitbucket Cloud Integration
 
