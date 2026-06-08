@@ -2,7 +2,7 @@
 
 This example demonstrates how to run VeeCode DevPortal locally with **LDAP authentication** and **LDAP org sync** enabled.
 
-The environment variable `VEECODE_PROFILE` is set to `ldap`, which configures the DevPortal to:
+The environment variable `VEECODE_PRESETS` is set to `recommended,veecode-theme,ldap`, which composes the DevPortal from self-contained presets. The `ldap` preset (an identity preset) carries LDAP sign-in plus ldapOrg user/group sync with OpenLDAP defaults (`usernameAttribute: uid`), and merges its own plugins and `app-config` into the runtime configuration at boot. It configures the DevPortal to:
 
 - Authenticate users against your LDAP server
 - Sync users and groups into the DevPortal catalog
@@ -12,7 +12,7 @@ This example is intentionally scoped to **authentication and org sync only** (no
 References:
 
 - LDAP auth plugin (source & behavior reference): https://github.com/veecode-platform/devportal-plugins/blob/main/workspace/ldap-auth/README.md
-- LDAP profile docs (authoritative env vars): https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles/#ldap-profile
+- Presets docs (authoritative env vars): https://docs.platform.vee.codes/devportal/installation-guide/docker-local/presets
 
 ## Overview
 
@@ -31,9 +31,9 @@ It does **not** configure repository discovery or SCM integrations.
 
 ## Required Environment Variables
 
-This example uses the **LDAP profile** (`VEECODE_PROFILE=ldap`).
+This example uses the **`ldap` preset** (part of `VEECODE_PRESETS=recommended,veecode-theme,ldap`).
 
-Required:
+Required environment variables (as passed through by `docker-compose.yml`):
 
 - `LDAP_URL` - LDAP server URL, e.g. `ldap://ldap.example.com:389`
 - `LDAP_DN` - Bind DN (distinguished name), e.g. `cn=admin,dc=vee,dc=codes`
@@ -147,6 +147,5 @@ Common causes:
 
 ## Next Steps
 
-- If you need to override or extend the profile configuration, mount an `app-config.local.yaml` and keep `VEECODE_PROFILE=ldap`.
-- For profile mechanics and merge order, see: https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles/
-
+- If you need to override or extend the preset configuration, mount an `app-config.local.yaml` and keep the same `VEECODE_PRESETS`.
+- For preset mechanics and merge order, see: https://docs.platform.vee.codes/devportal/installation-guide/docker-local/presets

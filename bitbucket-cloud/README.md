@@ -5,7 +5,7 @@ This quickstart shows how to configure **Bitbucket Cloud** integration in **VeeC
 - Import existing repositories into the Catalog
 - Use Bitbucket actions in the Scaffolder
 
-Note: there is no ready-to-use VEECODE_PROFILE for bitbucket, so we need to configure it manually.
+Note: there is no ready-to-use preset (`VEECODE_PRESETS`) for Bitbucket, so we configure it manually — this sample mounts an `app-config.local.yaml` and enables the Bitbucket Cloud dynamic plugins in `dynamic-plugins.yaml`.
 
 ---
 

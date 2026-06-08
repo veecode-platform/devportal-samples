@@ -4,7 +4,7 @@ This example demonstrates how to run VeeCode DevPortal locally with **LDAP authe
 
 A containerized Samba AD DC ([diegogslomp/samba-ad-dc](https://hub.docker.com/r/diegogslomp/samba-ad-dc)) is included in the Compose file so you can test the full flow without an external AD server.
 
-The environment variable `VEECODE_PROFILE` is set to `ldap-ad`, which configures the DevPortal to:
+The environment variable `VEECODE_PRESETS` is set to `recommended,veecode-theme,ldap,ldap-ad`, which composes the DevPortal from self-contained presets. The `ldap` preset (an identity preset) carries the LDAP bind, schedule and base DNs; `ldap-ad` overrides the OpenLDAP defaults for Active Directory (`sAMAccountName`, `objectClass=user`/`group`, `member`/`memberOf`). Order matters: list `ldap` before `ldap-ad`. Together they configure the DevPortal to:
 
 - Authenticate users against the AD/LDAP server
 - Sync users and groups into the DevPortal catalog
@@ -14,7 +14,7 @@ This example is intentionally scoped to **authentication and org sync only** (no
 References:
 
 - LDAP auth plugin (source & behavior reference): <https://github.com/veecode-platform/devportal-plugins/blob/main/workspace/ldap-auth/README.md>
-- LDAP profile docs (authoritative env vars): <https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles/#ldap-profile>
+- Presets docs (authoritative env vars): <https://docs.platform.vee.codes/devportal/installation-guide/docker-local/presets>
 
 ## Overview
 
@@ -62,12 +62,12 @@ DevPortal connects to the Samba AD DC using standard LDAP environment variables:
 | `LDAP_USERS_FILTER` | `(objectClass=user)` | AD user object class |
 | `LDAP_GROUPS_BASE_DN` | `dc=samdom,dc=example,dc=com` | Search base for groups |
 | `LDAP_GROUPS_FILTER` | `(objectClass=group)` | AD group object class |
-| `LDAP_TLS_REJECT_UNAUTHORIZED` | `false` | Samba AD ships a self-signed cert; defaults to `true` in the profile |
+| `LDAP_TLS_REJECT_UNAUTHORIZED` | `false` | Samba AD ships a self-signed cert; defaults to `true` in the preset |
 | `LDAP_SYNC_FREQUENCY` | `PT2M` | Short interval so new `samba-tool` users appear without waiting an hour; defaults to `PT1H` |
 
 > **Note:** The filters use AD-style object classes (`user`, `group`) instead of the OpenLDAP equivalents (`inetOrgPerson`, `groupOfNames`).
 
-The `ldap-ad` profile (baked into the image) configures catalog auth and org sync with **Active Directory attributes** (`sAMAccountName`, AD object classes, `member`/`memberOf`). The stock `ldap` profile expects `uid` / `inetOrgPerson` and would fail against Samba AD.
+The `ldap-ad` preset (composed on top of `ldap`) configures catalog auth and org sync with **Active Directory attributes** (`sAMAccountName`, AD object classes, `member`/`memberOf`). The stock `ldap` preset alone expects `uid` / `inetOrgPerson` and would fail against Samba AD.
 
 You may see catalog **warnings** for built-in Windows groups whose display names contain spaces (Backstage entity names must match `[a-zA-Z0-9][-_.a-zA-Z0-9]*`). Tighten `LDAP_GROUPS_FILTER` if you want only your own groups.
 
@@ -83,7 +83,7 @@ The DevPortal will be available at: **<http://localhost:7007>**
 
 ### LDAP sign-in (important)
 
-The auth plugin resolves the user with a single LDAP attribute: **`sAMAccountName`** (set by the `ldap-ad` profile).
+The auth plugin resolves the user with a single LDAP attribute: **`sAMAccountName`** (set by the `ldap-ad` preset).
 
 - Use the **short logon name** only, e.g. **`johndoe`** — the same value as in `samba-tool user add johndoe`.
 - Do **not** use the **UPN** (`johndoe@samdom.example.com`) or the **display name** (`John Doe`) in the username field; the lookup is `(sAMAccountName=<what you typed>)` and those values will not match.
@@ -156,5 +156,5 @@ docker compose down -v
 
 ## Next Steps
 
-- Extend the profile by editing `app-config.local.yaml` (mounted into the container) and keep `VEECODE_PROFILE=ldap-ad`.
-- For profile mechanics and merge order, see: <https://docs.platform.vee.codes/devportal/installation-guide/docker-local/profiles/>
+- Extend the presets by editing `app-config.local.yaml` (mounted into the container) and keep the same `VEECODE_PRESETS`.
+- For preset mechanics and merge order, see: <https://docs.platform.vee.codes/devportal/installation-guide/docker-local/presets>
