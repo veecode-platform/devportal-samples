@@ -33,7 +33,7 @@ As a quick way to test the kubernetes plugin, you can use the `vkdr` tool to sta
 4. Set env vars used in `docker-compose.yml`:
 
    ```sh
-   export VEECODE_PROFILE=github
+   export VEECODE_PRESETS=recommended,veecode-theme
    ```
 
 5. Start the DevPortal:
