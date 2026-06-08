@@ -9,21 +9,14 @@ catalog:
     - type: file
       target: /app/examples/org.yaml
       rules:
-        - allow: [User, Group]  
+        - allow: [User, Group]
 #
-# IMPORTANT: jenkins scaffolder plugin forces to set jenkins.baseUrl (etc),
-# so jenkins.instances syntax will break it
-# we may have to move jenkins scaffolder plugin to dynamic plugins
-#
-jenkins:
-  # baseUrl: null
-  # username: null
-  # apiKey: null
-  baseUrl: ${JENKINS_URL}
-  username: ${JENKINS_USERNAME}
-  apiKey: ${JENKINS_TOKEN}
-  # instances:
-  #   - name: default
-  #     baseUrl: ${JENKINS_URL}
-  #     username: ${JENKINS_USERNAME}
-  #     apiKey: ${JENKINS_TOKEN}
+# NOTE: the top-level `jenkins:` block was removed in the V2 migration.
+# The `jenkins` preset (VEECODE_PRESETS=...,jenkins) now emits the FLAT
+# jenkins config (jenkins.baseUrl/username/apiKey from
+# ${JENKINS_URL}/${JENKINS_USERNAME}/${JENKINS_TOKEN}) itself, so this file
+# no longer needs to declare it. The compose passes those three env vars.
+# Requires image >= 2.1.1 (the flat-preset fix from devportal-platform#51);
+# on 2.1.0 the preset still emitted the instances[] form. Do NOT re-add a
+# top-level jenkins.* here: the jenkins plugin rejects mixing the flat and
+# instances[] styles, which is what crashed boot before #51.

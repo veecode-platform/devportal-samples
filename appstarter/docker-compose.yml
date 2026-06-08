@@ -10,26 +10,28 @@
 
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.1.0
     ports:
       - "7007:7007"
     environment:
       - DEVELOPMENT=true
       - NODE_ENV=development
-      # will use shell value
-      - VEECODE_PROFILE=github
-      # GITHUB
+      # V2 presets — github (SCM: PAT + repo discovery + Actions tab)
+      # composed with github-auth (OAuth sign-in + org/team sync).
+      - VEECODE_PRESETS=recommended,veecode-theme,github,github-auth
+      # GITHUB (values read from the shell / .env)
+      # GITHUB_PAT replaces the V1 GITHUB_TOKEN (documented rename).
+      - GITHUB_PAT
       - GITHUB_ORG
-      - GITHUB_APP_ID
-      - GITHUB_CLIENT_ID
-      - GITHUB_CLIENT_SECRET
-      - GITHUB_PRIVATE_KEY
-      - GITHUB_TOKEN
+      - GITHUB_AUTH_CLIENT_ID
+      - GITHUB_AUTH_CLIENT_SECRET
+      # GitHub App integration (GITHUB_APP_ID / GITHUB_CLIENT_ID /
+      # GITHUB_PRIVATE_KEY) is not covered by the github/github-auth presets.
+      # If you used a GitHub App, lift that integrations.github[].apps block
+      # into a mounted app-config.local.yaml (see UPGRADING_FROM_BASE_DISTRO.md).
     volumes:
-      # dynamic plugins config (just enable/disable plugins)
+      # operator plugin boot file (Core plugins + your overrides)
       - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
-      # default dynamic plugins config (with default values)
-      #- ./dynamic-plugins.default.yaml:/app/dynamic-plugins.default.yaml:ro
       # your config will add/override the default image config
       #- ./app-config.yaml:/app/app-config.local.yaml:ro
 

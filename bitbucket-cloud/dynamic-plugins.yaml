@@ -1,12 +1,190 @@
+# Operator plugin boot file (VeeCode DevPortal V2).
 #
-# This is a dynamic plugins config file
+# This is the file the platform bind-mounts at /app/dynamic-plugins.yaml.
+# It carries the Core (always-on) plugins and is where an operator enables
+# extra plugins or disables a core one. Presets (VEECODE_PRESETS) add their
+# own plugins on top of this via the entrypoint's includes chain — you do NOT
+# list preset plugins here.
 #
-includes:
-  # Always start by merging the defaults that ship inside the image
-  - dynamic-plugins.default.yaml
+# dynamic-plugins.default.yaml is a vitrine (documentation/reference only) and
+# is NOT loaded at boot in V2.
+#
+# To enable an optional plugin:
+#   1. Find it in dynamic-plugins.default.yaml for the package ref and a
+#      ready-made pluginConfig block you can copy.
+#   2. Add it here with `disabled: false` and the pluginConfig you want.
+#   3. Restart the container (`docker compose restart devportal`).
+#
+# To disable a core plugin below, set its `disabled: true`.
+#
+# Multi-package plugins ship as frontend/backend pairs — disable each
+# package separately if needed.
+#
+# ── Bitbucket Cloud plugins (catalog + scaffolder) ───────────────────
+# FLAG / maintainer review needed. In V1 this sample loaded two plugins via
+# local-path refs:
+#     ./dynamic-plugins/dist/backstage-plugin-catalog-backend-module-bitbucket-cloud-dynamic
+#     ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-bitbucket-cloud-dynamic
+# In V2 those exact packages are NOT shippable as a static OCI ref:
+#   - There is no `bitbucket` preset.
+#   - They are absent from the platform vitrine (dynamic-plugins.default.yaml).
+#   - They are NOT in quay.io/veecode/backstage:bs_1.49.4 (that image only
+#     carries the bitbucket *auth* and *events* modules — verified by listing
+#     the image layer; catalog/scaffolder bitbucket modules are not present).
+# Instead the image pre-installs Bitbucket Cloud as MARKETPLACE EXTENSIONS:
+#     /app/catalog-entities/extensions/plugins/bitbucket-cloud-catalog-integration.yaml
+#     /app/catalog-entities/extensions/plugins/bitbucket-cloud-scaffolder-actions.yaml
+# (packages: backstage-plugin-catalog-backend-module-bitbucket-cloud and
+#  backstage-plugin-scaffolder-backend-module-bitbucket-cloud). The
+# `recommended` preset already wires the marketplace + extensions backend, and
+# the catalog-backend-module-extensions core plugin below surfaces them. Enable
+# them from the Marketplace UI (or via the extensions-install state file). No
+# hand-written OCI ref is added here on purpose — inventing one would point at a
+# package layer that does not exist in the published image and break boot.
 
+# ── Core (always-on) plugins ─────────────────────────────────────────
+# These are baked into the image (preInstalled: true). The install script
+# skips downloading them and only merges the pluginConfig below.
 plugins:
-  - package: ./dynamic-plugins/dist/backstage-plugin-catalog-backend-module-bitbucket-cloud-dynamic
+  - package: veecode-platform-plugin-veecode-homepage-dynamic
+    preInstalled: true
     disabled: false
-  - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-bitbucket-cloud-dynamic
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          veecode-platform.plugin-veecode-homepage:
+            translationResources:
+              - importName: homepageTranslations
+                ref: homepageTranslationRef
+            dynamicRoutes:
+              - path: /
+                importName: VeecodeHomepagePage
+                config:
+                  props:
+                    width: 1500
+                    height: 800
+
+  - package: veecode-platform-plugin-veecode-global-header-dynamic
+    preInstalled: true
     disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          veecode-platform.plugin-veecode-global-header:
+            translationResources:
+              - importName: globalHeaderTranslations
+                ref: globalHeaderTranslationRef
+            mountPoints:
+              - mountPoint: application/header
+                importName: GlobalHeader
+                config:
+                  position: above-main-content
+              - mountPoint: global.header/component
+                importName: SearchComponent
+                config:
+                  priority: 100
+              - mountPoint: global.header/component
+                importName: Spacer
+                config:
+                  priority: 99
+                  props:
+                    growFactor: 0
+              - mountPoint: global.header/component
+                importName: Divider
+                config:
+                  priority: 90
+              - mountPoint: global.header/component
+                importName: NotificationButton
+                config:
+                  priority: 60
+              - mountPoint: global.header/component
+                importName: StarredDropdown
+                config:
+                  priority: 70
+                  props:
+                    growFactor: 0
+              - mountPoint: global.header/component
+                importName: ToggleThemeButton
+                config:
+                  priority: 75
+                  props:
+                    growFactor: 0
+              - mountPoint: global.header/component
+                importName: ProfileDropdown
+                config:
+                  priority: 10
+              - mountPoint: global.header/profile
+                importName: MenuItemLink
+                config:
+                  priority: 100
+                  props:
+                    title: Settings
+                    link: /settings
+                    icon: manageAccounts
+              - mountPoint: global.header/profile
+                importName: MenuItemLink
+                config:
+                  priority: 90
+                  props:
+                    title: My profile
+                    titleKey: profile.myProfile
+                    type: user
+              - mountPoint: global.header/profile
+                importName: LogoutButton
+                config:
+                  priority: 10
+
+  - package: veecode-platform-backstage-plugin-about-dynamic
+    preInstalled: true
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          veecode-platform.backstage-plugin-about:
+            appIcons:
+              - name: aboutIcon
+                importName: AboutIcon
+            dynamicRoutes:
+              - path: /about
+                importName: AboutPage
+                menuItem:
+                  icon: aboutIcon
+                  text: About
+                  enabled: true
+            menuItems:
+              about:
+                parent: admin
+                title: About
+                icon: aboutIcon
+
+  - package: veecode-platform-backstage-plugin-about-backend-dynamic
+    preInstalled: true
+    disabled: false
+
+  - package: internal-plugin-dynamic-plugins-info
+    preInstalled: true
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          internal.plugin-dynamic-plugins-info:
+            dynamicRoutes: []
+            mountPoints: []
+            menuItems:
+              extensions:
+                enabled: false
+
+  - package: red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions
+    preInstalled: true
+    disabled: false
+    pluginConfig:
+      extensions:
+        directory: /app/catalog-entities/extensions
+        installation:
+          enabled: true
+          saveToSingleFile:
+            # Lives under DEVPORTAL_DB_PATH (a persistent directory volume,
+            # default /app/data) — NOT a single-file bind mount. The marketplace
+            # backend rewrites this file via a temp-file + atomic rename, which
+            # fails on a single-file bind mount. Same directory as the database.
+            file: ${DEVPORTAL_DB_PATH:-/app/data}/extensions-install.yaml

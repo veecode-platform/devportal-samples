@@ -6,17 +6,20 @@
 
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.1.0
     ports:
       - "7007:7007"
     volumes:
       # Minimal stub for local patches — empty by default.
       #- ./app-config.local.yaml:/app/app-config.local.yaml:ro
+      # operator plugin boot file (Core plugins + your overrides)
       - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
     environment:
       - NODE_ENV=development
-      # AD-tuned LDAP profile (sAMAccountName, objectClass=user/group).
-      - VEECODE_PROFILE=ldap-ad
+      # V2 presets — ldap (bind + schedule + base DNs) composed with ldap-ad,
+      # which overrides the OpenLDAP defaults for Active Directory
+      # (sAMAccountName, objectClass=user/group). Order matters: ldap before ldap-ad.
+      - VEECODE_PRESETS=recommended,veecode-theme,ldap,ldap-ad
       # LDAP
       - LDAP_URL=ldap://dc1:389
       - LDAP_DN=CN=Administrator,CN=Users,DC=samdom,DC=example,DC=com

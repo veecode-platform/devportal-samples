@@ -18,13 +18,14 @@ upstream:
   backstage:
     image:
       repository: veecode/devportal
-      tag: 1.3.0
+      tag: 2.1.0
     # criar secret e profile no k8s
     extraEnvVarsSecrets:
       - backstage-secrets
     extraEnvVars:
-      - name: VEECODE_PROFILE
-        value: "keycloak"
+      # V2 preset — keycloak (OIDC sign-in + keycloakOrg user/group sync).
+      - name: VEECODE_PRESETS
+        value: "recommended,veecode-theme,keycloak"
       - name: NODE_ENV
         value: "development"
     command: null

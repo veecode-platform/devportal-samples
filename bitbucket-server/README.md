@@ -5,7 +5,7 @@ This quickstart shows how to configure **Bitbucket Server** (self-hosted) integr
 - Import existing repositories into the Catalog
 - Use Bitbucket actions in the Scaffolder
 
-Note: there is no ready-to-use VEECODE_PROFILE for bitbucket, so we need to configure it manually.
+Note: there is no ready-to-use preset (`VEECODE_PRESETS`) for Bitbucket, so we configure it manually — this sample runs the `recommended,veecode-theme` baseline presets and mounts an `app-config.local.yaml` with the Bitbucket Server integration. The Bitbucket Server catalog/scaffolder plugins ship as pre-installed marketplace extensions (enable them from the Marketplace page).
 
 ---
 
@@ -50,21 +50,22 @@ services:
       - BITBUCKET_SERVER_TOKEN
 ```
 
-Check the Bitbucket Server dynamic plugins by editing `dynamic-plugins.yaml`:
+The Bitbucket Server catalog/scaffolder plugins ship as **pre-installed marketplace
+extensions** in the image (the `recommended` preset wires the marketplace + extensions
+backend). Enable them from the **Marketplace** page in the running portal:
 
-```yaml
-plugins:
-  - package: ./dynamic-plugins/dist/backstage-plugin-catalog-backend-module-bitbucket-server-dynamic
-    disabled: false
-
-  - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-bitbucket-server-dynamic
-    disabled: false
-```
+- `backstage-plugin-catalog-backend-module-bitbucket-server` (Bitbucket Server Discovery)
+- `backstage-plugin-scaffolder-backend-module-bitbucket-server` (Bitbucket Server Software Template Actions)
 
 These plugins enable:
 
 - Automatic repository discovery (Catalog Provider)
 - Bitbucket actions in the Scaffolder
+
+> Note (V2): unlike the V1 sample, you do NOT hand-list these in
+> `dynamic-plugins.yaml` via `./dynamic-plugins/dist/...` refs. They are not
+> available as a static OCI ref in the published image — they install through
+> the marketplace. See the flag note at the top of `dynamic-plugins.yaml`.
 
 ## Bitbucket Server Integration
 

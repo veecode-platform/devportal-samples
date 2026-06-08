@@ -10,22 +10,23 @@
 
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.1.1
     ports:
       - "7007:7007"
     environment:
       - DEVELOPMENT=true
       - NODE_ENV=development
-      # will use shell value
-      - VEECODE_PROFILE=local
-      - GITHUB_TOKEN
+      # V2 presets — recommended + veecode-theme baseline plus jenkins
+      # (CI tab on entity pages). In V1 the Jenkins plugins were hand-listed in
+      # dynamic-plugins.yaml under the "local" profile; the jenkins preset now
+      # owns them. The mounted app-config.yaml below still wires jenkins.* and
+      # wins over the preset (operator override loads last).
+      - VEECODE_PRESETS=recommended,veecode-theme,jenkins
       - JENKINS_URL
       - JENKINS_USERNAME
       - JENKINS_TOKEN
     volumes:
-      # dynamic plugins config (just enable/disable plugins)
+      # operator plugin boot file (Core plugins + your overrides)
       - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
-      # default dynamic plugins config (with default values)
-      #- ./dynamic-plugins.default.yaml:/app/dynamic-plugins.default.yaml:ro
       # your config will add/override the default image config
       - ./app-config.yaml:/app/app-config.local.yaml:ro
