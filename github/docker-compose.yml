@@ -10,25 +10,24 @@
 
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.1.0
     ports:
       - "7007:7007"
     environment:
       - NODE_ENV=development
-      # will use shell value
-      - VEECODE_PROFILE=github
-      # GITHUB
+      # V2 presets — github (SCM: PAT + repo discovery + Actions tab)
+      # composed with github-auth (OAuth sign-in + org/team sync).
+      - VEECODE_PRESETS=recommended,veecode-theme,github,github-auth
+      # GITHUB (values read from the shell / .env)
+      # GITHUB_PAT replaces the V1 GITHUB_TOKEN (documented rename).
+      - GITHUB_PAT
       - GITHUB_ORG
       - GITHUB_AUTH_CLIENT_ID
       - GITHUB_AUTH_CLIENT_SECRET
-      - GITHUB_APP_ID
-      - GITHUB_CLIENT_ID
-      - GITHUB_CLIENT_SECRET
-      # line breaks can cause headaches
-      # - GITHUB_PRIVATE_KEY
-      # encoding GITHUB_PRIVATE_KEY with base64 works better here
-      - GITHUB_PRIVATE_KEY_BASE64
-      - GITHUB_TOKEN
+      # GitHub App integration (GITHUB_APP_ID / GITHUB_CLIENT_ID /
+      # GITHUB_PRIVATE_KEY_BASE64) is not covered by the github/github-auth
+      # presets. If you used a GitHub App, lift that integrations.github[].apps
+      # block into a mounted app-config.local.yaml (see UPGRADING_FROM_BASE_DISTRO.md).
     volumes:
       # dynamic plugins config (just enable/disable plugins)
       - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro

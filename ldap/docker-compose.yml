@@ -6,16 +6,17 @@
 
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.1.0
     ports:
       - "7007:7007"
     volumes:
-      # Minimal stub for local patches — disabling plugins that require MCP.
+      # operator plugin boot file (Core plugins + your overrides)
       - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
     environment:
       - NODE_ENV=development
-      # LDAP profile
-      - VEECODE_PROFILE=ldap
+      # V2 preset — ldap carries LDAP sign-in + ldapOrg user/group sync
+      # (OpenLDAP defaults: usernameAttribute uid).
+      - VEECODE_PRESETS=recommended,veecode-theme,ldap
       # LDAP
       - LDAP_URL=ldap://host.docker.internal:9000
       - LDAP_DN=cn=admin,dc=vee,dc=codes

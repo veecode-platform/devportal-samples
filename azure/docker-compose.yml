@@ -10,20 +10,23 @@
 
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.1.0
     ports:
       - "7007:7007"
     environment:
       - NODE_ENV=development
-      # will use shell value
-      - VEECODE_PROFILE=azure
-      # AZURE/MS
-      - AZURE_TENANT_ID
-      - AZURE_CLIENT_ID
-      - AZURE_CLIENT_SECRET
-      - AZURE_ORGANIZATION
-      - AZURE_PROJECT
-      - AZURE_TOKEN
+      # V2 presets — azure (DevOps SCM: integration + catalog + pipelines UI)
+      # composed with azure-auth (Microsoft / Entra ID sign-in + msgraphOrg sync).
+      - VEECODE_PRESETS=recommended,veecode-theme,azure,azure-auth
+      # AZURE DEVOPS (SCM) — values read from the shell / .env
+      - AZURE_DEVOPS_TOKEN
+      - AZURE_DEVOPS_HOST=dev.azure.com
+      - AZURE_DEVOPS_ORG
+      - AZURE_DEVOPS_PROJECT
+      # MICROSOFT / ENTRA ID (sign-in)
+      - AZURE_AUTH_TENANT_ID
+      - AZURE_AUTH_CLIENT_ID
+      - AZURE_AUTH_CLIENT_SECRET
     volumes:
-      # dynamic plugins config (just enable/disable plugins)
+      # operator plugin boot file (Core plugins + your overrides)
       - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro

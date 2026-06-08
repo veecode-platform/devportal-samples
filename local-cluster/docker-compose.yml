@@ -6,21 +6,23 @@
 
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.1.0
     ports:
       - "7007:7007"
     environment:
       - DEVELOPMENT=true
       - NODE_ENV=development
-      # will use shell value
-      - VEECODE_PROFILE=local
+      # V2 baseline presets (recommended + veecode-theme), matching the V1
+      # "local" profile. The Kubernetes plugin is NOT enabled via the
+      # `kubernetes` preset (which needs K8S_CLUSTER_* env vars): this sample
+      # wires the cluster via the mounted app-config.yaml (localKubectlProxy +
+      # the kubectl-cli sidecar) and enables the k8s plugin in dynamic-plugins.yaml.
+      - VEECODE_PRESETS=recommended,veecode-theme
     volumes:
       # your config will add/override the default image config
       - ./app-config.yaml:/app/app-config.local.yaml:ro
-      # dynamic plugins config (just enable/disable plugins)
+      # operator plugin boot file (Core plugins + Kubernetes frontend plugin)
       - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
-      # default dynamic plugins config (with default values)
-      #- ./dynamic-plugins.default.yaml:/app/dynamic-plugins.default.yaml:ro
       # examples folder
       - ./examples:/app/examples:ro
       # RBAC policy (remove later)

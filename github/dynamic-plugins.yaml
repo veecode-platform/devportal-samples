@@ -1,39 +1,168 @@
+# Operator plugin boot file (VeeCode DevPortal V2).
 #
-# This is a dynamic plugins config file bundled with the devportal-base image.
-# It is used to define the behaviour of the dynamic plugins system pre-startup.
+# This is the file the platform bind-mounts at /app/dynamic-plugins.yaml.
+# It carries the Core (always-on) plugins and is where an operator enables
+# extra plugins or disables a core one. Presets (VEECODE_PRESETS) add their
+# own plugins on top of this via the entrypoint's includes chain — you do NOT
+# list preset plugins here.
 #
-# Plugins at "dynamic-plugins-root" will be loaded at startup, and its default 
-# content is defined by the "dynamic-plugins" workspace (downloads and wrappers).
-# This file defines, on the other hand, defines the plugins that will be copied 
-# into the "dynamic-plugins-root" folder during startup.
+# dynamic-plugins.default.yaml is a vitrine (documentation/reference only) and
+# is NOT loaded at boot in V2.
 #
-# It is important to undertand: pre-installed plugins are bundled with the image.
-# They are forcibly loaded at startup if placed in the "dynamic-plugins-root" folder.
-# They are **not** forcibly loaded if kept somewhere else.
+# To enable an optional plugin:
+#   1. Find it in dynamic-plugins.default.yaml for the package ref and a
+#      ready-made pluginConfig block you can copy.
+#   2. Add it here with `disabled: false` and the pluginConfig you want.
+#   3. Restart the container (`docker compose restart devportal`).
 #
-# This config file will enumerate plugins that:
+# To disable a core plugin below, set its `disabled: true`.
 #
-# 1. Are bundled in the image file system, but outside the "dynamic-plugins-root" folder.
-# 2. Are not bundled in the image, but are available for download.
-#
-# A start script will process this file and make sure enabled plugins are copied
-# into the "dynamic-plugins-root" folder *and* that their configuration gets merged
-# into a proper dedicated "app-config" file.
-#
-includes:
-  # Always start by merging the defaults that ship inside the image
-  # That makes it easy to enable plugins with defaults that would otherwise
-  # be painful to configure.
-  - dynamic-plugins.default.yaml
+# Multi-package plugins ship as frontend/backend pairs — disable each
+# package separately if needed.
 
+# ── Core (always-on) plugins ─────────────────────────────────────────
+# These are baked into the image (preInstalled: true). The install script
+# skips downloading them and only merges the pluginConfig below.
 plugins:
-  - package: ./dynamic-plugins/dist/roadiehq-backstage-plugin-security-insights-dynamic
+  - package: veecode-platform-plugin-veecode-homepage-dynamic
+    preInstalled: true
     disabled: false
-  - package: ./dynamic-plugins/dist/roadiehq-backstage-plugin-github-insights-dynamic
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          veecode-platform.plugin-veecode-homepage:
+            translationResources:
+              - importName: homepageTranslations
+                ref: homepageTranslationRef
+            dynamicRoutes:
+              - path: /
+                importName: VeecodeHomepagePage
+                config:
+                  props:
+                    width: 1500
+                    height: 800
+
+  - package: veecode-platform-plugin-veecode-global-header-dynamic
+    preInstalled: true
     disabled: false
-  - package: ./dynamic-plugins/dist/backstage-community-plugin-github-actions-dynamic
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          veecode-platform.plugin-veecode-global-header:
+            translationResources:
+              - importName: globalHeaderTranslations
+                ref: globalHeaderTranslationRef
+            mountPoints:
+              - mountPoint: application/header
+                importName: GlobalHeader
+                config:
+                  position: above-main-content
+              - mountPoint: global.header/component
+                importName: SearchComponent
+                config:
+                  priority: 100
+              - mountPoint: global.header/component
+                importName: Spacer
+                config:
+                  priority: 99
+                  props:
+                    growFactor: 0
+              - mountPoint: global.header/component
+                importName: Divider
+                config:
+                  priority: 90
+              - mountPoint: global.header/component
+                importName: NotificationButton
+                config:
+                  priority: 60
+              - mountPoint: global.header/component
+                importName: StarredDropdown
+                config:
+                  priority: 70
+                  props:
+                    growFactor: 0
+              - mountPoint: global.header/component
+                importName: ToggleThemeButton
+                config:
+                  priority: 75
+                  props:
+                    growFactor: 0
+              - mountPoint: global.header/component
+                importName: ProfileDropdown
+                config:
+                  priority: 10
+              - mountPoint: global.header/profile
+                importName: MenuItemLink
+                config:
+                  priority: 100
+                  props:
+                    title: Settings
+                    link: /settings
+                    icon: manageAccounts
+              - mountPoint: global.header/profile
+                importName: MenuItemLink
+                config:
+                  priority: 90
+                  props:
+                    title: My profile
+                    titleKey: profile.myProfile
+                    type: user
+              - mountPoint: global.header/profile
+                importName: LogoutButton
+                config:
+                  priority: 10
+
+  - package: veecode-platform-backstage-plugin-about-dynamic
+    preInstalled: true
     disabled: false
-  - package: ./dynamic-plugins/dist/veecode-platform-backstage-plugin-github-workflows-backend-dynamic
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          veecode-platform.backstage-plugin-about:
+            appIcons:
+              - name: aboutIcon
+                importName: AboutIcon
+            dynamicRoutes:
+              - path: /about
+                importName: AboutPage
+                menuItem:
+                  icon: aboutIcon
+                  text: About
+                  enabled: true
+            menuItems:
+              about:
+                parent: admin
+                title: About
+                icon: aboutIcon
+
+  - package: veecode-platform-backstage-plugin-about-backend-dynamic
+    preInstalled: true
     disabled: false
-  - package: ./dynamic-plugins/dist/veecode-platform-backstage-plugin-github-workflows-dynamic
+
+  - package: internal-plugin-dynamic-plugins-info
+    preInstalled: true
     disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          internal.plugin-dynamic-plugins-info:
+            dynamicRoutes: []
+            mountPoints: []
+            menuItems:
+              extensions:
+                enabled: false
+
+  - package: red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions
+    preInstalled: true
+    disabled: false
+    pluginConfig:
+      extensions:
+        directory: /app/catalog-entities/extensions
+        installation:
+          enabled: true
+          saveToSingleFile:
+            # Lives under DEVPORTAL_DB_PATH (a persistent directory volume,
+            # default /app/data) — NOT a single-file bind mount. The marketplace
+            # backend rewrites this file via a temp-file + atomic rename, which
+            # fails on a single-file bind mount. Same directory as the database.
+            file: ${DEVPORTAL_DB_PATH:-/app/data}/extensions-install.yaml

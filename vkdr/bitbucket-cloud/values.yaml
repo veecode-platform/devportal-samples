@@ -24,13 +24,14 @@ upstream:
   backstage:
     image:
       repository: veecode/devportal
-      tag: 1.2.24
+      tag: 2.1.0
     # criar secret e profile no k8s
     # extraEnvVarsSecrets:
     #   - backstage-secrets
     extraEnvVars:
-      - name: VEECODE_PROFILE
-        value: "ldap"    
+      # V2 preset — ldap (LDAP sign-in + user/group sync, OpenLDAP defaults).
+      - name: VEECODE_PRESETS
+        value: "recommended,veecode-theme,ldap"
       - name: LDAP_URL
         value: "ldap://openldap.openldap.svc.cluster.local:389"  
       - name: LDAP_DN

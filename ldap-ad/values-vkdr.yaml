@@ -24,13 +24,14 @@ upstream:
   backstage:
     image:
       repository: veecode/devportal
-      tag: 1.5.8
+      tag: 2.1.0
     # criar secret e profile no k8s
     #extraEnvVarsSecrets:
     #   - backstage-secrets
     extraEnvVars:
-      - name: VEECODE_PROFILE
-        value: "ldap-ad"
+      # V2 presets — ldap + ldap-ad (AD overrides). Order matters: ldap first.
+      - name: VEECODE_PRESETS
+        value: "recommended,veecode-theme,ldap,ldap-ad"
       - name: LDAP_URL
         value: "ldap://host.k3d.internal:8389"
       - name: LDAP_DN

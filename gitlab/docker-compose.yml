@@ -10,13 +10,14 @@
 
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.1.0
     ports:
       - "7007:7007"
     environment:
       - NODE_ENV=development
-      # will use shell value
-      - VEECODE_PROFILE=gitlab
+      # V2 preset — gitlab carries both SCM (integration + catalog discovery)
+      # and identity (OAuth sign-in); no separate gitlab-auth preset.
+      - VEECODE_PRESETS=recommended,veecode-theme,gitlab
       # GITLAB
       - GITLAB_AUTH_CLIENT_ID=${GITLAB_AUTH_CLIENT_ID}
       - GITLAB_AUTH_CLIENT_SECRET=${GITLAB_AUTH_CLIENT_SECRET}
