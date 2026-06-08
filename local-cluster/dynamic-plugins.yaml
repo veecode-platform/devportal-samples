@@ -175,7 +175,7 @@ plugins:
   # backend is static (registered in the image's packages/backend).
   # Package ref + pluginConfig copied from the platform vitrine
   # (dynamic-plugins.default.yaml, Group: Kubernetes).
-  - package: oci://${PLUGIN_REGISTRY:-quay.io/veecode}/backstage:bs_1.49.4!backstage-plugin-kubernetes
+  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_1.49.4!backstage-plugin-kubernetes
     disabled: false
     pluginConfig:
       dynamicPlugins:
