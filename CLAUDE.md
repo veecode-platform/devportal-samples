@@ -10,22 +10,30 @@ See [README.md](README.md) for available examples and common commands.
 
 ## Architecture
 
-### Profile System
+### Preset System
 
-All examples use the `VEECODE_PROFILE` environment variable to select bundled configurations:
+All examples use the `VEECODE_PRESETS` environment variable to compose the DevPortal from self-contained presets, using the `veecode/devportal:2.x` image. Presets are comma-separated and merge their own plugins and `app-config` into the runtime configuration at boot. A typical value looks like:
 
-- `github` - GitHub OAuth + integrations
-- `azure` - Azure DevOps authentication
-- `ldap` - LDAP directory sync
-- `local` - Local-only configuration
-- `sonarqube` - SonarQube integration
-- `bitbucket` - Bitbucket integration
+```
+VEECODE_PRESETS=recommended,veecode-theme,<scm>,<auth>
+```
+
+- `recommended` - baseline set of recommended plugins (always start here)
+- `veecode-theme` - VeeCode branding/theme
+- `github` + `github-auth` - GitHub as catalog/SCM (PAT + repo discovery + Actions tab) plus GitHub OAuth sign-in and org/team user sync
+- `azure` + `azure-auth` - Azure DevOps integration plus authentication
+- `gitlab` - GitLab as catalog/SCM
+- `jenkins` - Jenkins CI/CD integration
+- `keycloak` - Keycloak authentication
+- `ldap` - LDAP directory sync (compose with `ldap-ad` for Active Directory)
+
+The exact preset list for each example is defined by `VEECODE_PRESETS` in that example's `docker-compose.yml`. Baseline/local-only examples use just `recommended,veecode-theme`.
 
 ### Configuration Merging Order
 
 1. Base image `app-config.yaml`
-2. Profile-specific overrides via `VEECODE_PROFILE`
-3. `dynamic-plugins.yaml` plugin configurations
+2. Preset-specific plugins and `app-config` contributed by each preset in `VEECODE_PRESETS`
+3. `dynamic-plugins.yaml` boot file (Core/always-on plugins; where you enable extra plugins or disable a core one — it does not list preset plugins)
 4. Optional `app-config.local.yaml` for final customization
 5. Environment variable interpolation at runtime
 
