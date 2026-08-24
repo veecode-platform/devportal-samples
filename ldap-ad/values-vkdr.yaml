@@ -1,13 +1,13 @@
 global:
   dynamic:
     plugins:
-      - package: oci://quay.io/veecode/backstage:bs_1.49.4!backstage-plugin-mcp-actions-backend
+      - package: oci://quay.io/veecode/backstage-plugin-mcp-actions-backend:bs_1.52.0__0.1.14!backstage-plugin-mcp-actions-backend
         disabled: true
-      - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras
+      - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras:bs_1.52.0__0.2.3!red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras
         disabled: true
-      - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras
+      - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras:bs_1.52.0__0.4.2!red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras
         disabled: true
-      - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras
+      - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras:bs_1.52.0__0.2.4!red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras
         disabled: true
 upstream:
   enabled: true
